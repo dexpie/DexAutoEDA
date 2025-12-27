@@ -2,18 +2,17 @@
 
 **DexAutoEDA** is the ultimate Python application for Data Scientists and Competition participants. It automates EDA, Data Cleaning, and Machine Learning Baselines in one click.
 
-## ✨ "Gacor" Features (v4 - Time Series)
+## ✨ Features (v5 - Advanced AutoML)
+- **🤖 Advanced AutoML & Model Comparison**:
+    - **Multi-Model Training**: Train **Random Forest**, **XGBoost**, **LightGBM**, and **Linear/Logistic Regression** simultaneously.
+    - **Leaderboard**: Compare models based on Accuracy/F1 (Classification) or R2/RMSE (Regression).
+    - **Download Model**: One-click download of the best performing model (`.pkl`).
 - **📈 Time Series Analysis**:
     - **Interactive Trends**: Visualize data over time with zoomable Range Sliders.
-    - **Resampling**: Automatically aggregates data (e.g., Monthly averages) to see long-term patterns.
-    - **Smart Date Detection**: One-click conversion of text to datetime.
-- **🤖 Zero-Code AutoML**: 
-    - Automatically detects if your problem is **Classification** or **Regression**.
-    - Trains a baseline **Random Forest** model.
-    - Displays **Feature Importance**.
+    - **Resampling**: Automatically aggregates data.
 - **🛠️ Advanced Feature Engineering**:
-    - **One-Hot & Label Encoding** for categorical data.
-    - **Standard & MinMax Scaling** for numeric data.
+    - **One-Hot & Label Encoding**.
+    - **Standard & MinMax Scaling**.
 - **Interactive Visualizations**: Zoom, pan, and hover over charts using **Plotly**.
 - **Actionable Data Cleaning**: Smart imputation and duplicate removal.
 
@@ -45,5 +44,6 @@ Run the application using Streamlit:
 ```bash
 streamlit run app.py
 ```
-1. Upload your CSV.
-2. For Time Series, go to **"📈 Time Series"** tab and convert your date column.
+1. Go to **"🤖 AutoML"** tab.
+2. Select your Target Column and choose models to compare.
+3. Click **"Train & Compare"** 🚀.

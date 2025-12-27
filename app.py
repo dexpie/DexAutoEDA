@@ -182,33 +182,63 @@ with tab2:
         st.subheader("Preview")
         st.dataframe(df.head(5))
 
-# Tab 3: AutoML (New!)
+# Tab 3: AutoML (Advanced)
 with tab3:
-    st.header("🤖 AutoML Baseline Model")
-    st.info("Train a simple Random Forest model to check data signal and feature importance.")
+    st.header("🤖 Advanced AutoML")
+    st.info("Train and compare multiple models (Random Forest, XGBoost, LightGBM) to find the best performer.")
     
-    target_col = st.selectbox("Select Target Column (Y)", df.columns)
+    col1, col2 = st.columns([1, 2])
     
-    if st.button("🚀 Train Baseline Model"):
-        with st.spinner("Training model..."):
-            try:
-                results = ml_utils.train_baseline_model(df, target_col)
-                
-                # Metrics
-                st.success(f"Model Trained! Task Type: **{results['model_type'].title()}**")
-                
-                col_m1, col_m2 = st.columns(2)
-                with col_m1:
-                    st.json(results['metrics'])
-                    
-                # Feature Importance
-                st.subheader("FEATURE IMPORTANCE (Insights!)")
-                st.write("These features have the most predictive power.")
-                fig_imp = visualizer.plot_feature_importance(results['feature_importance'])
-                st.plotly_chart(fig_imp, use_container_width=True)
-                
-            except Exception as e:
-                st.error(f"Training failed: {e}")
+    with col1:
+        st.subheader("Configuration")
+        target_col = st.selectbox("Select Target Column (Y)", df.columns)
+        
+        st.markdown("##### Select Models")
+        models_to_train = []
+        if st.checkbox("Random Forest", value=True): models_to_train.append("Random Forest")
+        if st.checkbox("XGBoost", value=True): models_to_train.append("XGBoost")
+        if st.checkbox("LightGBM", value=True): models_to_train.append("LightGBM")
+        if st.checkbox("Linear/Logistic Regression", value=True): models_to_train.append("Linear/Logistic")
+        
+        train_btn = st.button("🚀 Train & Compare")
+        
+    with col2:
+        if train_btn:
+             if not models_to_train:
+                 st.warning("Please select at least one model.")
+             else:
+                 with st.spinner(f"Training {len(models_to_train)} models..."):
+                    try:
+                        results_pkg = ml_utils.train_models(df, target_col, models_to_train)
+                        
+                        # 1. Comparison Table
+                        st.subheader("🏆 Model Leaderboard")
+                        results_df = pd.DataFrame(results_pkg['results']).sort_values(
+                            by='Accuracy' if results_pkg['problem_type'] == 'classification' else 'R2 Score', 
+                            ascending=False
+                        )
+                        st.dataframe(results_df, use_container_width=True)
+                        
+                        best_model_name = results_pkg['best_model_name']
+                        st.success(f"**Best Model:** {best_model_name}")
+                        
+                        # 2. Download Best Model
+                        model_bytes = ml_utils.save_model(results_pkg['best_model'])
+                        st.download_button(
+                            label=f"💾 Download {best_model_name} Model (.pkl)",
+                            data=model_bytes,
+                            file_name=f"best_model_{best_model_name}_dexautoeda.pkl",
+                            mime="application/octet-stream"
+                        )
+                        
+                        # 3. Feature Importance (Best Model)
+                        if not results_pkg['feature_importance'].empty:
+                            st.subheader(f"Feature Importance ({best_model_name})")
+                            fig_imp = visualizer.plot_feature_importance(results_pkg['feature_importance'])
+                            st.plotly_chart(fig_imp, use_container_width=True)
+                            
+                    except Exception as e:
+                        st.error(f"Training failed: {e}")
 
 # Tab 4: Time Series (New!)
 with tab4:
