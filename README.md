@@ -2,11 +2,15 @@
 
 **DexAutoEDA** is the ultimate Python application for Data Scientists and Competition participants. It automates EDA, Data Cleaning, and Machine Learning Baselines in one click.
 
-## ✨ "Gacor" Features (v3)
+## ✨ "Gacor" Features (v4 - Time Series)
+- **📈 Time Series Analysis**:
+    - **Interactive Trends**: Visualize data over time with zoomable Range Sliders.
+    - **Resampling**: Automatically aggregates data (e.g., Monthly averages) to see long-term patterns.
+    - **Smart Date Detection**: One-click conversion of text to datetime.
 - **🤖 Zero-Code AutoML**: 
     - Automatically detects if your problem is **Classification** or **Regression**.
     - Trains a baseline **Random Forest** model.
-    - Displays **Feature Importance** to help you select the best features.
+    - Displays **Feature Importance**.
 - **🛠️ Advanced Feature Engineering**:
     - **One-Hot & Label Encoding** for categorical data.
     - **Standard & MinMax Scaling** for numeric data.
@@ -42,6 +46,4 @@ Run the application using Streamlit:
 streamlit run app.py
 ```
 1. Upload your CSV.
-2. Go to **"🤖 AutoML"** tab.
-3. Select your Target Column and click **"Train Baseline Model"**.
-4. Get instant results!
+2. For Time Series, go to **"📈 Time Series"** tab and convert your date column.

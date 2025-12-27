@@ -41,3 +41,13 @@ def get_dataset_info(df):
         'dtypes': df.dtypes.to_dict(),
         'info_str': info_str
     }
+
+def convert_to_datetime(df, col):
+    """
+    Converts a column to datetime objects.
+    """
+    try:
+        df[col] = pd.to_datetime(df[col], errors='coerce')
+        return df
+    except Exception:
+        return df

@@ -42,3 +42,18 @@ def get_correlation(df):
     if numeric_df.empty:
         return pd.DataFrame()
     return numeric_df.corr()
+
+def get_time_series_summary(df, date_col, value_col, freq='M'):
+    """
+    Resamples time series and calculates rolling stats.
+    freq: 'D', 'W', 'M', 'Y'
+    """
+    ts_df = df.copy()
+    if not pd.api.types.is_datetime64_any_dtype(ts_df[date_col]):
+        return None
+        
+    ts_df = ts_df.set_index(date_col).sort_index()
+    
+    # Resample
+    resampled = ts_df[value_col].resample(freq).mean()
+    return resampled

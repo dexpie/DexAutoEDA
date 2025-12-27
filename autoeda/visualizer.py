@@ -55,3 +55,11 @@ def plot_feature_importance(importance_df):
                  title='Top 15 Feature Importance', color='Importance')
     fig.update_layout(yaxis={'categoryorder':'total ascending'})
     return fig
+
+def plot_time_series(df, date_col, value_col):
+    """
+    Plots interactive Time Series with Range Slider.
+    """
+    fig = px.line(df, x=date_col, y=value_col, title=f'{value_col} over Time')
+    fig.update_xaxes(rangeslider_visible=True)
+    return fig

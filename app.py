@@ -73,10 +73,11 @@ numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
 categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
 
 # Main Layout with Tabs
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
     "🔍 Overview", 
     "🛠️ Processing",
     "🤖 AutoML",
+    "📈 Time Series",
     "🧹 Data Quality", 
     "📊 Statistics", 
     "📉 Visualizations", 
@@ -209,8 +210,45 @@ with tab3:
             except Exception as e:
                 st.error(f"Training failed: {e}")
 
-# Tab 4: Data Quality
+# Tab 4: Time Series (New!)
 with tab4:
+    st.header("📈 Time Series Analysis")
+    
+    # Date Conversion
+    dt_cols = [col for col in df.columns if pd.api.types.is_datetime64_any_dtype(df[col])]
+    possible_dt_cols = [col for col in df.columns if df[col].dtype == 'object' or 'date' in col.lower() or 'time' in col.lower()]
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("##### Date Column Selection")
+        # Allow user to pick a column to convert if not already identified
+        if dt_cols:
+            selected_date_col = st.selectbox("Select Date Column", dt_cols)
+        else:
+            selected_date_col = st.selectbox("Select Column to Convert to Date", possible_dt_cols)
+            if st.button("📅 Convert to Datetime"):
+                df = loader.convert_to_datetime(df, selected_date_col)
+                st.session_state['df'] = df
+                st.success(f"Converted {selected_date_col} to Datetime.")
+                st.rerun()
+
+    with col2:
+         if pd.api.types.is_datetime64_any_dtype(df[selected_date_col]):
+             st.markdown("##### Visualizations")
+             value_col_ts = st.selectbox("Select Value to Plot", numeric_cols)
+             if value_col_ts:
+                 fig_ts = visualizer.plot_time_series(df, selected_date_col, value_col_ts)
+                 st.plotly_chart(fig_ts, use_container_width=True)
+                 
+                 st.markdown("##### Resampled Analysis (Monthly Mean)")
+                 resampled_data = eda.get_time_series_summary(df, selected_date_col, value_col_ts, freq='M')
+                 if resampled_data is not None:
+                     st.line_chart(resampled_data)
+         else:
+             st.info("Please select or convert a date column first.")
+
+# Tab 5: Data Quality
+with tab5:
     st.header("Data Quality Assessment")
     col1, col2 = st.columns(2)
     with col1:
@@ -232,8 +270,8 @@ with tab4:
     if outlier_summary:
         st.write(outlier_summary)
 
-# Tab 5: Statistics
-with tab5:
+# Tab 6: Statistics
+with tab6:
     st.header("Descriptive Statistics")
     st.subheader("Numeric Summary")
     st.dataframe(eda.get_descriptive_stats(df), use_container_width=True)
@@ -246,8 +284,8 @@ with tab5:
             st.text(f"Column: {col}")
             st.dataframe(val_counts)
 
-# Tab 6: Visualizations
-with tab6:
+# Tab 7: Visualizations
+with tab7:
     st.header("Interactive Visualizations")
     col1, col2 = st.columns(2)
     with col1:
@@ -285,8 +323,8 @@ with tab6:
         fig_corr = visualizer.plot_correlation_heatmap(corr_matrix)
         st.plotly_chart(fig_corr, use_container_width=True)
 
-# Tab 7: Insights
-with tab7:
+# Tab 8: Insights
+with tab8:
     st.header("🤖 Automated Insights")
     missing_df = cleaner.check_missing(df)
     corr_matrix = eda.get_correlation(df) if len(numeric_cols) > 1 else pd.DataFrame()
@@ -303,8 +341,8 @@ with tab7:
     for ins in general_insights:
         st.success(f"📌 {ins}")
 
-# Tab 8: Report
-with tab8:
+# Tab 9: Report
+with tab9:
     st.header("Export Interactive Report")
     st.write("Generate a standalone HTML report containing all analysis and interactive Plotly charts.")
     if st.button("Generate HTML Report"):
