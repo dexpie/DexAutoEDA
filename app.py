@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from autoeda import loader, cleaner, eda, visualizer, insights, reporter, ml_utils
+from autoeda import loader, cleaner, eda, visualizer, insights, reporter, ml_utils, chat_utils
 
 # Page Config
 st.set_page_config(
@@ -38,6 +38,7 @@ st.markdown("### Interactive EDA & Zero-Code AutoML")
 
 # Sidebar
 st.sidebar.header("📁 Data Loader")
+openai_api_key = st.sidebar.text_input("OpenAI API Key (Optional)", type="password", help="Required for Chat with Data feature.")
 uploaded_file = st.sidebar.file_uploader("Upload CSV File", type=["csv"])
 
 # Initialize session state for dataframe if not invalid
@@ -73,10 +74,11 @@ numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
 categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
 
 # Main Layout with Tabs
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
     "🔍 Overview", 
     "🛠️ Processing",
     "🤖 AutoML",
+    "💬 Chat",
     "📈 Time Series",
     "🧹 Data Quality", 
     "📊 Statistics", 
@@ -240,8 +242,57 @@ with tab3:
                     except Exception as e:
                         st.error(f"Training failed: {e}")
 
-# Tab 4: Time Series (New!)
+
+# Tab 4: Chat with Data (New!)
 with tab4:
+    st.header("💬 Chat with Data (PandasAI)")
+    st.info("Ask questions in plain English! (e.g., 'Plot a bar chart of Sales by Region')")
+    
+    if not openai_api_key:
+        st.warning("⚠️ Please enter your OpenAI API Key in the sidebar to use this feature.")
+    else:
+        # Chat Interface
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+
+        # Display chat history
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+                if "image" in message:
+                    st.image(message["image"])
+
+        # User Input
+        if prompt := st.chat_input("Ask something about your data..."):
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
+
+            # Generate Response
+            with st.chat_message("assistant"):
+                with st.spinner("Analyzing..."):
+                    agent = chat_utils.init_agent(df, openai_api_key)
+                    if agent:
+                        response = chat_utils.chat_with_data(agent, prompt)
+                        
+                        # Handle Response Type
+                        # PandasAI might return a path to an image if it plotted something
+                        # OR return a SmartDataframe object, need to handle varied returns carefully
+                        # For simple usage v1, assume text or we check if response is string path to .png
+                        
+                        # If response is a plot path (PandasAI usually saves charts to temp dir)
+                        # We will display it. 
+                        # Note: Deep integration might require custom callback config in PandasAI.
+                        # For now, let's treat generic response.
+                        
+                        st.write(response) # display text or object representation
+                        st.session_state.messages.append({"role": "assistant", "content": str(response)})
+                        
+                    else:
+                        st.error("Failed to initialize agent/API key.")
+
+# Tab 5: Time Series
+with tab5:
     st.header("📈 Time Series Analysis")
     
     # Date Conversion
@@ -277,8 +328,8 @@ with tab4:
          else:
              st.info("Please select or convert a date column first.")
 
-# Tab 5: Data Quality
-with tab5:
+# Tab 6: Data Quality
+with tab6:
     st.header("Data Quality Assessment")
     col1, col2 = st.columns(2)
     with col1:
@@ -300,8 +351,8 @@ with tab5:
     if outlier_summary:
         st.write(outlier_summary)
 
-# Tab 6: Statistics
-with tab6:
+# Tab 7: Statistics
+with tab7:
     st.header("Descriptive Statistics")
     st.subheader("Numeric Summary")
     st.dataframe(eda.get_descriptive_stats(df), use_container_width=True)
@@ -314,8 +365,8 @@ with tab6:
             st.text(f"Column: {col}")
             st.dataframe(val_counts)
 
-# Tab 7: Visualizations
-with tab7:
+# Tab 8: Visualizations
+with tab8:
     st.header("Interactive Visualizations")
     col1, col2 = st.columns(2)
     with col1:
@@ -353,8 +404,8 @@ with tab7:
         fig_corr = visualizer.plot_correlation_heatmap(corr_matrix)
         st.plotly_chart(fig_corr, use_container_width=True)
 
-# Tab 8: Insights
-with tab8:
+# Tab 9: Insights
+with tab9:
     st.header("🤖 Automated Insights")
     missing_df = cleaner.check_missing(df)
     corr_matrix = eda.get_correlation(df) if len(numeric_cols) > 1 else pd.DataFrame()
@@ -371,8 +422,8 @@ with tab8:
     for ins in general_insights:
         st.success(f"📌 {ins}")
 
-# Tab 9: Report
-with tab9:
+# Tab 10: Report
+with tab10:
     st.header("Export Interactive Report")
     st.write("Generate a standalone HTML report containing all analysis and interactive Plotly charts.")
     if st.button("Generate HTML Report"):

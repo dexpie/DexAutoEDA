@@ -2,25 +2,25 @@
 
 **DexAutoEDA** is the ultimate Python application for Data Scientists and Competition participants. It automates EDA, Data Cleaning, and Machine Learning Baselines in one click.
 
-## ✨ Features (v5 - Advanced AutoML)
-- **🤖 Advanced AutoML & Model Comparison**:
-    - **Multi-Model Training**: Train **Random Forest**, **XGBoost**, **LightGBM**, and **Linear/Logistic Regression** simultaneously.
-    - **Leaderboard**: Compare models based on Accuracy/F1 (Classification) or R2/RMSE (Regression).
-    - **Download Model**: One-click download of the best performing model (`.pkl`).
-- **📈 Time Series Analysis**:
-    - **Interactive Trends**: Visualize data over time with zoomable Range Sliders.
-    - **Resampling**: Automatically aggregates data.
-- **🛠️ Advanced Feature Engineering**:
-    - **One-Hot & Label Encoding**.
-    - **Standard & MinMax Scaling**.
-- **Interactive Visualizations**: Zoom, pan, and hover over charts using **Plotly**.
-- **Actionable Data Cleaning**: Smart imputation and duplicate removal.
+## ✨ Features (v6 - Chat with Data)
+- **💬 NLP Chat Interface ("Jarvis")**:
+    - Ask questions in plain English: *"What is the average Sales per Region?"*
+    - Auto-generate Plots: *"Plot a histogram of Age"*
+    - Powered by **PandasAI** and OpenAI.
+- **🤖 Advanced AutoML (v5)**:
+    - Train & Compare **XGBoost**, **LightGBM**, **Random Forest**.
+    - Leaderboard & Model Download.
+- **📈 Time Series Analysis (v4)**:
+    - Interactive Line Charts & Resampling.
+- **🛠️ Feature Engineering**: One-Hot, Label Encoding, Scaling.
+- **Interactive Visualizations**: Plotly integration.
 
 ## 📂 Project Structure
 ```
 autoeda/
 ├── autoeda/           # Core Logic Package
-│   ├── ml_utils.py    # AutoML & Modeling Logic
+│   ├── chat_utils.py  # NLP Interface (PandasAI)
+│   ├── ml_utils.py    # AutoML & Defense
 │   ├── loader.py      # Data ingestion
 │   ├── cleaner.py     # Quality & Preprocessing
 │   ├── eda.py         # Stats analysis
@@ -28,7 +28,6 @@ autoeda/
 │   ├── insights.py    # Insight generation
 │   └── reporter.py    # HTML export
 ├── app.py             # Main Streamlit App
-├── examples/          # Example Datasets
 └── requirements.txt   # Dependencies
 ```
 
@@ -44,6 +43,7 @@ Run the application using Streamlit:
 ```bash
 streamlit run app.py
 ```
-1. Go to **"🤖 AutoML"** tab.
-2. Select your Target Column and choose models to compare.
-3. Click **"Train & Compare"** 🚀.
+**For Chat Feature:**
+1. Enter your **OpenAI API Key** in the sidebar.
+2. Go to **"💬 Chat"** tab.
+3. Ask away!
